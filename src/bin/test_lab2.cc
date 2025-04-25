@@ -58,7 +58,9 @@ int main(int argc, char** argv) {
       catalog.insert_record(table1, {"test_record_" + std::to_string(count++), i});
     }
 
-    auto iter = index->get_iter(Value(0LL), Value(99999999LL));
+    auto iter = index->get_iter(Value(int64_t(0)), Value(99999999));
+    // we call Value(int64_t(0)) instead of Value(0) because c++ may interpret 0 as
+    // nullptr and be ambiguous with the constructor Value(const char*)
 
     Record& record_buf = catalog.get_record_buf(table1);
     iter->begin(record_buf);
