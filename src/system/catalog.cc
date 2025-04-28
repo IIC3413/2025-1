@@ -74,7 +74,7 @@ Catalog::Catalog(const string& filename) {
     switch (index_type) {
     case IndexType::B_PLUS_TREE: {
       auto key_col_idx = read_int64();
-      index = std::make_unique<BPlusTree>(*heap_file.get(), key_col_idx, normalize(table_name));
+      index = std::make_unique<BPlusTree>(*heap_file.get(), key_col_idx, normalize(table_name) + ".bpt");
       break;
     }
     case IndexType::NONE:
