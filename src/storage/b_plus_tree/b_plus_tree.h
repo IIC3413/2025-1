@@ -20,6 +20,10 @@ public:
     return IndexType::B_PLUS_TREE;
   }
 
+  int get_key_column_idx() override {
+    return key_column_idx;
+  }
+
   const HeapFile& heap_file;
 
   const int key_column_idx;

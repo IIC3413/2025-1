@@ -18,6 +18,8 @@ public:
 
   virtual IndexType get_type() = 0;
 
+  virtual int get_key_column_idx() = 0;
+
 private:
   virtual void insert_record(RID rid) = 0;
 

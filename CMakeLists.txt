@@ -55,7 +55,7 @@ set(BUILD_TARGETS
     create_table
     insert
     print_table
-    test_lab2
+	execute_query
 )
 
 # Build targets

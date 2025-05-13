@@ -1,16 +1,5 @@
 # IIC3413-DB
 
-## Lab 2 Testing
-There is one example test at `src/bin/test_lab2.cc`. After compiling the project you can run it
-passing a parameter `t`. For example if you want `t` = 10000:
-```bash
-build/Debug/bin/test_lab2 10000
-```
-
-Be careful on running this on a too high number, as the size on disk increases with the parameter.
-
-The aim of this test is not to be the only test you use, but to provide an example on how you can test your solution.
-
 ## Project Build
 
 Install Dependencies:
@@ -28,6 +17,20 @@ For Mac you need to install the **Xcode Command Line Tools** and [Homebrew](http
 ```bash
 brew install cmake
 ```
+
+Grammar Generation:
+--------------------------------------------------------------------------------
+
+To generate the necessary grammar files do one of the following:
+
+- In the `src/query/parser/grammar` directory run the shell script
+  `generate.sh`. This require you to have Java installed in your machine.
+
+- Build the provided docker image and run it using the next two commands:
+  ```
+  docker build -f Dockerfile.Parser -t iic3413db-parser .
+  docker run --rm -v $(pwd)/src/query/parser/grammar/:/src/query/parser/grammar iic3413db-parser
+  ```
 
 Build the Project:
 --------------------------------------------------------------------------------

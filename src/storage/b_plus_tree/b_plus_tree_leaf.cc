@@ -31,9 +31,47 @@ std::unique_ptr<BPlusTreeSplit> BPlusTreeLeaf::insert_record(const BPlusTreeReco
   }
 
   if (record_count < max_records) {
-    // TODO: Problema 1
+    // shift right record 1 position from `index` to the end
+    for (auto i = record_count - 1; i >= index; i--) {
+      set_record(i + 1, get_record(i));
+    }
+
+    set_record(index, record);
+    set_record_count(record_count + 1);
+    return nullptr;
   } else {
-    // TODO: Problema 2
+    // put new record and save the last (that does not fit)
+    BPlusTreeRecord last_record = get_record(max_records - 1);
+    if (index == max_records) {
+      last_record = record;
+    } else {
+      // shift right records 1 position from `index` to the penultimate record
+      for (auto i = record_count - 2; i >= index; i--) {
+        set_record(i + 1, get_record(i));
+      }
+      set_record(index, record);
+    }
+
+    // create new leaf to be between this old leaf and the old next
+    BPlusTreeLeaf new_leaf(bpt);
+    new_leaf.set_next_page_number(get_next_page_number());
+
+    set_next_page_number(new_leaf.page.get_page_number());
+
+    constexpr auto middle_index = (max_records + 1) / 2;
+
+    for (int i = middle_index, j = 0; i < max_records; i++, j++) {
+      new_leaf.set_record(j, get_record(i));
+    }
+    new_leaf.set_record((max_records / 2), last_record);
+
+    // update counts
+    set_record_count(middle_index);
+    new_leaf.set_record_count((max_records / 2) + 1);
+
+    auto split_record = new_leaf.get_record(0);
+
+    return std::make_unique<BPlusTreeSplit>(split_record, new_leaf.page.get_page_number());
   }
 }
 
@@ -42,7 +80,15 @@ void BPlusTreeLeaf::delete_record(const BPlusTreeRecord& record) {
   if (record_count == 0) {
     return;
   }
-  // TODO: Bonus
+  auto index = search_index(record);
+
+  if (index < max_records && get_record(index) == record) {
+    // shift left records 1 position from `index` to the end
+    for (auto i = index + 1; i < record_count; i++) {
+      set_record(i - 1, get_record(i));
+    }
+    set_record_count(record_count - 1);
+  }
 }
 
 int32_t BPlusTreeLeaf::get_record_count() const {

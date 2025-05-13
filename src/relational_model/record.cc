@@ -40,3 +40,10 @@ void Record::set(const std::vector<std::variant<std::string_view, int64_t>>& new
     }
   }
 }
+
+void Record::set(const std::vector<Value>& new_values) {
+  assert(new_values.size() == values.size());
+  for (size_t i = 0; i < values.size(); i++) {
+    values[i] = Value(new_values[i]);
+  }
+}
