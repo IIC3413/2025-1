@@ -70,6 +70,7 @@ public:
   void reset() override {
     lhs->reset();
     rhs->reset();
+    valid_lhs = false;
   }
 
   RecordRef& get_output() override {
