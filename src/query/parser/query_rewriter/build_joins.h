@@ -74,10 +74,19 @@ public:
 
       std::vector<std::unique_ptr<LogicalPlan>> join_children;
       for (auto& child : children) {
-        auto* relation = static_cast<RelationPlan*>(child.get());
-        assert(relation != nullptr && "Expected a relation");
+      auto* relation = dynamic_cast<RelationPlan*>(children[0].get());
+      auto* left_outer_join = dynamic_cast<LeftOuterJoinPlan*>(children[0].get());
 
-        if (joined_aliases.find(relation->alias) != joined_aliases.end()) {
+      std::string alias;
+      if (relation != nullptr) {
+        alias = relation->alias;
+      } else if (left_outer_join != nullptr) {
+        alias = left_outer_join->alias;
+      } else {
+        throw QueryException("Cartesian product expects aliased children");
+      }
+
+        if (joined_aliases.find(alias) != joined_aliases.end()) {
           join_children.push_back(std::move(child));
         }
       }
