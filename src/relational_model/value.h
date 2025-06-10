@@ -29,6 +29,8 @@ public:
 
   ~Value();
 
+  uint64_t get_hash() const;
+
   void operator=(const Value& other);
   void operator=(Value&& other);
 

@@ -3,6 +3,8 @@
 #include <cassert>
 #include <cstring>
 
+#include "third_party/murmur3/murmur3.h"
+
 Value::Value(Value&& other)
     : datatype(other.datatype),
       value(other.value) {
@@ -77,6 +79,22 @@ Value::~Value() {
   if (datatype == DataType::STR) {
     delete[] value.as_str;
   }
+}
+
+uint64_t Value::get_hash() const {
+  uint64_t _hash[2];
+  switch (datatype) {
+  case DataType::INT: {
+    MurmurHash3_x64_128(&value.as_int, sizeof(value.as_int), 0, _hash);
+    break;
+  }
+  case DataType::STR: {
+    auto strlen = std::strlen(value.as_str);
+    MurmurHash3_x64_128(value.as_str, strlen, 0, _hash);
+    break;
+  }
+  }
+  return _hash[0];
 }
 
 bool Value::operator<(const Value& other) const {

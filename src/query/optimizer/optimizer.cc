@@ -7,11 +7,11 @@
 #include <memory>
 #include <utility>
 
-#include "query/executor/expr/init.h"
+#include "query/executor/expr/exprs.h"
 #include "query/executor/query_iter.h"
 #include "query/executor/query_iters.h"
-#include "query/parser/logical_plan/expr/init.h"
-#include "query/parser/logical_plan/init.h"
+#include "query/parser/logical_plan/expr/expr_plans.h"
+#include "query/parser/logical_plan/plans.h"
 #include "relational_model/schema.h"
 #include "system/system.h"
 
@@ -203,7 +203,7 @@ void Optimizer::visit(JoinPlan& join) {
           std::move(lhs), std::move(rhs), std::move(projected_lhs_columns), std::move(projected_rhs_columns)
       );
     } else {
-      current_iter = std::make_unique<Join>(
+      current_iter = std::make_unique<HashJoin>(
           std::move(lhs), std::move(rhs), std::move(projected_lhs_columns), std::move(projected_rhs_columns),
           std::move(equalities)
       );

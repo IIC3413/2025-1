@@ -5,7 +5,7 @@
 
 class ExprColumn : public Expr {
 public:
-  ExprColumn(Column column, Value* value_ptr)
+  ExprColumn(Column column, const Value* value_ptr)
       : column(column),
         value_ptr(value_ptr) {}
 
@@ -20,5 +20,5 @@ public:
 
 private:
   Column column;
-  Value* value_ptr;
+  const Value* value_ptr;
 };

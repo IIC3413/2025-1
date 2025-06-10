@@ -3,7 +3,7 @@
 #include <map>
 #include <memory>
 
-#include "query/parser/logical_plan/init.h"
+#include "query/parser/logical_plan/plans.h"
 
 namespace Parser::QueryRewriter {
 
@@ -35,7 +35,9 @@ public:
       const auto columns = expression->get_columns();
       if (columns.size() == 1) {
         // Simple expression
-        id2simple_expressions[std::pair(columns.begin()->alias, columns.begin()->table)].push_back(std::move(expression));
+        id2simple_expressions[std::pair(columns.begin()->alias, columns.begin()->table)].push_back(
+            std::move(expression)
+        );
       } else {
         remaining_expressions.push_back(std::move(expression));
       }
@@ -74,9 +76,8 @@ public:
     const auto& key = std::pair(relation.alias, relation.table);
     current_plan = relation.clone();
     if (id2simple_expressions.find(key) != id2simple_expressions.end()) {
-      current_plan = std::make_unique<SelectionPlan>(
-          std::move(current_plan), std::move(id2simple_expressions[key])
-      );
+      current_plan =
+          std::make_unique<SelectionPlan>(std::move(current_plan), std::move(id2simple_expressions[key]));
     }
   }
 

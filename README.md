@@ -18,20 +18,6 @@ For Mac you need to install the **Xcode Command Line Tools** and [Homebrew](http
 brew install cmake
 ```
 
-Grammar Generation:
---------------------------------------------------------------------------------
-
-To generate the necessary grammar files do one of the following:
-
-- In the `src/query/parser/grammar` directory run the shell script
-  `generate.sh`. This require you to have Java installed in your machine.
-
-- Build the provided docker image and run it using the next two commands:
-  ```
-  docker build -f Dockerfile.Parser -t iic3413db-parser .
-  docker run --rm -v $(pwd)/src/query/parser/grammar/:/src/query/parser/grammar iic3413db-parser
-  ```
-
 Build the Project:
 --------------------------------------------------------------------------------
 Open a terminal in the project root directory, then execute the commands:
@@ -49,4 +35,25 @@ cmake -Bbuild/Debug -DCMAKE_BUILD_TYPE=Debug && cmake --build build/Debug/
 To use multiple cores during compilation (much faster) add `-j n` at the end of the previous commands, replacing `n` with the desired number of threads. Example for 8 threads:
 ```bash
 cmake -Bbuild/Debug -DCMAKE_BUILD_TYPE=Debug && cmake --build build/Debug/ -j 8
+```
+
+Test for lab 4:
+--------------------------------------------------------------------------------
+
+We provide an example database and some queries to show how to do tests for this lab.
+
+First delete the old database if you have one:
+
+```bash
+rm -r data/test_example
+```
+
+Then create the database:
+```bash
+build/Debug/bin/create_db
+```
+
+Now you can execute a query passing the query folder as first parameter and the query file as second parameter, add `--explain` to print the logical plan and physical plans:
+```bash
+build/Debug/bin/execute_query data/test_example/ data/query1.sql --explain
 ```

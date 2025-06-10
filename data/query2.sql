@@ -1,0 +1,3 @@
+SELECT *
+FROM U, V
+WHERE U.u1 == V.v2

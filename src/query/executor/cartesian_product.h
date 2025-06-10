@@ -21,11 +21,11 @@ public:
         out(projected_lhs_columns.size() + projected_rhs_columns.size()) {
 
     for (size_t i = 0; i < projected_lhs_columns.size(); i++) {
-      out.values[i] = lhs_out.values[projected_lhs_columns[i].first];
+      out.values[i] = lhs_out.values[projected_lhs_columns[i].pos];
     }
     size_t offset = projected_lhs_columns.size();
     for (size_t i = 0; i < projected_rhs_columns.size(); i++) {
-      out.values[offset + i] = rhs_out.values[projected_rhs_columns[i].first];
+      out.values[offset + i] = rhs_out.values[projected_rhs_columns[i].pos];
     }
   }
 
@@ -60,7 +60,6 @@ public:
   void reset() override {
     lhs->reset();
     rhs->reset();
-    valid_lhs = false;
   }
 
   RecordRef& get_output() override {
@@ -70,10 +69,10 @@ public:
   std::vector<Column> get_columns() override {
     std::vector<Column> res;
     for (auto& c : projected_lhs_columns) {
-      res.push_back(c.second);
+      res.push_back(c.col);
     }
     for (auto& c : projected_rhs_columns) {
-      res.push_back(c.second);
+      res.push_back(c.col);
     }
     return res;
   }

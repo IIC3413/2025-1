@@ -43,6 +43,8 @@ public:
 
   Index* get_index(const std::string& table_name);
 
+  int64_t get_table_cardinality(const std::string& table_name) const;
+
 private:
   std::map<std::string, int64_t> table_name_idx;
 

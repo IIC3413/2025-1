@@ -1,10 +1,10 @@
 #include <iostream>
 #include <memory>
 
+#include "query/optimizer/optimizer.h"
+#include "query/optimizer/edit_optimizer.h"
 #include "query/parser/logical_plan/logical_plan.h"
 #include "query/parser/parser.h"
-#include "query/translator/optimizer.h"
-#include "query/translator/passthrough.h"
 #include "system/system.h"
 #include "third_party/cli11/CLI11.hpp"
 
@@ -37,7 +37,7 @@ void select_query(std::unique_ptr<LogicalPlan> logical_plan, bool explain) {
 }
 
 void edit_query(std::unique_ptr<LogicalPlan> logical_plan, bool explain) {
-  auto action = PassThrough::create_physical_plan(std::move(logical_plan));
+  auto action = EditOptimizer::create_physical_plan(std::move(logical_plan));
   if (explain) {
     std::cout << "Physical Plan:\n";
     std::cout << *action << std::endl;

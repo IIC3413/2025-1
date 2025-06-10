@@ -18,6 +18,29 @@ Record::Record(const Schema& schema) {
   }
 }
 
+Record::Record(const std::vector<DataType> types) {
+  for (const auto& type : types) {
+    switch (type) {
+    case DataType::INT: {
+      values.push_back(Value((int64_t)0));
+      break;
+    }
+    case DataType::STR: {
+      values.push_back(Value(""));
+      break;
+    }
+    }
+  }
+}
+
+Record::Record(Record&& other) {
+  std::swap(values, other.values);
+}
+
+Record::Record(std::vector<Value>&& other_values) {
+  std::swap(values, other_values);
+}
+
 void Record::set(const std::vector<std::variant<std::string_view, int64_t>>& new_values) {
   assert(new_values.size() == values.size());
 

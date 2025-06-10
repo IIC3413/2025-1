@@ -12,26 +12,43 @@ HeapFile& get_or_create_table(const std::string& table_name, std::vector<ColumnI
   if (table == nullptr) { // table doesn't exist
     table = catalog.create_table(table_name, table_schema);
   } else {
-    assert(existing_table_schema == table_schema);
+    std::cerr << "Database already has table " << table_name << std::endl;
+    exit(EXIT_FAILURE);
   }
   return *table;
 }
 
-void populate_t1() {
-  for (int i = 1; i < 15; i++) {
-    catalog.insert_record("T1", {"test.record." + std::to_string(i), i});
+void populate_r() {
+  for (int i = 0; i < 100; i++) {
+    catalog.insert_record("R", {i, i + 1, "test.r" + std::to_string(i)});
   }
 }
 
-void populate_t2() {
-  for (int i = 10; i < 15; i++) {
-    catalog.insert_record("T2", {i + 1, i + 5, i * 2 - 1});
+void populate_s() {
+  for (int i = 0; i < 200; i++) {
+    catalog.insert_record("S", {i, i * 2, "test.s" + std::to_string(i)});
   }
 }
 
-void populate_t3() {
-  for (int i = 20; i < 25; i++) {
-    catalog.insert_record("T3", {i, 2 * i, 3 * i});
+void populate_t() {
+  for (int i = 0; i < 300; i++) {
+    catalog.insert_record("T", {i, i * i, "test.t" + std::to_string(i)});
+  }
+}
+
+void populate_u() {
+  for (int i = 0; i < 10; i++) {
+    for (int j = 0; j < 10; j++) {
+      catalog.insert_record("U", {i, j, "test.u" + std::to_string(i) + "_" + std::to_string(j)});
+    }
+  }
+}
+
+void populate_v() {
+  for (int i = 0; i < 50; i++) {
+    for (int j = i; j < 50; j++) {
+      catalog.insert_record("V", {i, j, "test.v" + std::to_string(i) + "_" + std::to_string(j)});
+    }
   }
 }
 
@@ -43,15 +60,21 @@ int main() {
   // When this object comes out of scope the database is no longer usable
   auto system = System::init(database_folder, buffer_size);
 
-  get_or_create_table("T1", {{"a", DataType::STR}, {"b", DataType::INT}});
+  get_or_create_table("R", {{"r1", DataType::INT}, {"r2", DataType::INT}, {"r3", DataType::STR}});
 
-  get_or_create_table("T2", {{"a", DataType::INT}, {"b", DataType::INT}, {"c", DataType::INT}});
+  get_or_create_table("S", {{"s1", DataType::INT}, {"s2", DataType::INT}, {"s3", DataType::STR}});
 
-  get_or_create_table("T3", {{"x", DataType::INT}, {"y", DataType::INT}, {"z", DataType::INT}});
+  get_or_create_table("T", {{"t1", DataType::INT}, {"t2", DataType::INT}, {"t3", DataType::STR}});
 
-  populate_t1();
-  populate_t2();
-  populate_t3();
+  get_or_create_table("U", {{"u1", DataType::INT}, {"u2", DataType::INT}, {"u3", DataType::STR}});
+
+  get_or_create_table("V", {{"v1", DataType::INT}, {"v2", DataType::INT}, {"v3", DataType::STR}});
+
+  populate_r();
+  populate_s();
+  populate_t();
+  populate_u();
+  populate_v();
 
   std::cout << "Database " << database_folder << " created" << std::endl;
 

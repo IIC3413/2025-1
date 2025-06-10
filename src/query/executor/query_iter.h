@@ -5,8 +5,14 @@
 #include "query/parser/logical_plan/logical_plan.h"
 #include "relational_model/record.h"
 
-// ProjectedColumn: (pos, Column).
-using ProjectedColumn = std::pair<size_t, Column>;
+struct ProjectedColumn {
+  size_t pos;
+  Column col;
+
+  ProjectedColumn(size_t pos, Column col)
+      : pos(pos),
+        col(col) {}
+};
 
 class QueryIter {
 public:

@@ -1,0 +1,3 @@
+SELECT *
+FROM R, S
+WHERE R.r1 == S.s2

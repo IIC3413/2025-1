@@ -57,7 +57,8 @@ Catalog::Catalog(const string& filename) {
 
     std::string table_name = read_string();
     int64_t table_cardinality = read_int64();
-    for (int64_t c = 0; c < table_cardinality; ++c) {
+    int64_t table_column_count = read_int64();
+    for (int64_t c = 0; c < table_column_count; ++c) {
       DataType d = static_cast<DataType>(read_int64());
       std::string col_name = read_string();
       columns.push_back({col_name, d});
@@ -81,7 +82,9 @@ Catalog::Catalog(const string& filename) {
       break;
     }
 
-    tables.emplace_back(table_name, std::move(schema), std::move(heap_file), std::move(index));
+    tables.emplace_back(
+        table_name, std::move(schema), std::move(heap_file), std::move(index), table_cardinality
+    );
   }
 }
 
@@ -93,6 +96,7 @@ Catalog::~Catalog() {
     write_string(table_info.name);
     auto& schema = table_info.schema;
 
+    write_int64(table_info.cardinality);
     write_int64(schema->columns.size());
     for (size_t i = 0; i < schema->columns.size(); i++) {
       write_int64(static_cast<int64_t>(schema->columns[i].datatype));
@@ -172,7 +176,9 @@ HeapFile* Catalog::create_table(const std::string& table_name, const Schema& sch
 
   auto heap_file = std::make_unique<HeapFile>(table_id, schema, normalized_table_name);
 
-  tables.emplace_back(normalized_table_name, std::make_unique<Schema>(schema), std::move(heap_file), nullptr);
+  tables.emplace_back(
+      normalized_table_name, std::make_unique<Schema>(schema), std::move(heap_file), nullptr, 0
+  );
 
   return tables.back().heap_file.get();
 }
@@ -199,6 +205,7 @@ RID Catalog::insert_record(
   record.set(values);
 
   auto rid = tables[table_pos].heap_file->insert_record(record);
+  tables[table_pos].cardinality++;
 
   auto index = tables[get_table_pos(table_name)].index.get();
   if (index != nullptr) {
@@ -277,4 +284,8 @@ void Catalog::create_index(const std::string& table_name, int key_col_idx) {
 
 Index* Catalog::get_index(const std::string& table_name) {
   return tables[get_table_pos(table_name)].index.get();
+}
+
+int64_t Catalog::get_table_cardinality(const std::string& table_name) const {
+  return tables[get_table_pos(table_name)].cardinality;
 }

@@ -12,7 +12,13 @@ class Record {
 public:
   Record(const Schema& schema);
 
+  Record(std::vector<DataType> types);
+
   Record(const Record& other) = delete;
+
+  Record(Record&& other);
+
+  Record(std::vector<Value>&& other);
 
   void set(const std::vector<std::variant<std::string_view, int64_t>>& values);
 
@@ -28,7 +34,27 @@ public:
     return os;
   }
 
+  bool operator==(const Record& other) const {
+    return this->values == other.values;
+  }
+
+  uint64_t hash() {
+    Hasher hasher;
+    return hasher.operator()(*this);
+  }
+
   std::vector<Value> values;
+
+  struct Hasher {
+    uint64_t operator()(const Record& record) const {
+      uint64_t res = 0;
+      for (const auto& value: record.values) {
+        res ^= value.get_hash();
+      }
+      return res;
+    }
+  };
+
 };
 
 class RecordRef {
@@ -49,5 +75,5 @@ public:
     return os;
   }
 
-  std::vector<Value*> values;
+  std::vector<const Value*> values;
 };

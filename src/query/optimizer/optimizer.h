@@ -43,11 +43,15 @@ public:
 class Optimizer : public LogicalPlanVisitor {
 public:
   std::unique_ptr<QueryIter> current_iter;
+
   // the plans are navigated via DFS, remembering how many usages each column have
   std::map<Column, size_t> column_usage;
+
   std::map<Column, std::pair<Value, Value>> column_range;
+
   // alias to column
   std::map<std::string, Column> between_optimizations;
+
   std::set<ExprPlan*> deleted_expr_plans;
 
   static std::unique_ptr<QueryIter> create_physical_plan(std::unique_ptr<LogicalPlan>);

@@ -2,12 +2,14 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "Test L2",
+            "name": "Test L4",
             "type": "lldb",
             "request": "launch",
-            "program": "${workspaceFolder}/build/Debug/bin/test_lab2",
+            "program": "${workspaceFolder}/build/Debug/bin/execute_query",
             "args": [
-                "50000"
+                "${workspaceFolder}/data/test_example",
+                "${workspaceFolder}/data/query1.sql",
+                "--explain",
             ],
             "cwd": "${workspaceFolder}",
             "preLaunchTask": "Debug Build"

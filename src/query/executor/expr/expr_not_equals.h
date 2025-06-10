@@ -18,7 +18,7 @@ public:
   const Value& eval() override {
     auto& lhs_res = lhs->eval();
     auto& rhs_res = rhs->eval();
-    res.value.as_int = static_cast<int64_t>(lhs_res != rhs_res);
+    res.value.as_int = static_cast<int64_t>(lhs_res == rhs_res);
     return res;
   }
 

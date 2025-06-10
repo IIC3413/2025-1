@@ -6,9 +6,10 @@
 #include <vector>
 
 #include "exceptions/exceptions.h"
-#include "query/parser/logical_plan/expr/init.h"
-#include "query/parser/logical_plan/init.h"
+#include "query/parser/logical_plan/expr/expr_plans.h"
+#include "query/parser/logical_plan/join_order/join_optimizer.h"
 #include "query/parser/logical_plan/left_outer_join_plan.h"
+#include "query/parser/logical_plan/plans.h"
 
 namespace Parser::QueryRewriter {
 
@@ -74,27 +75,19 @@ public:
 
       std::vector<std::unique_ptr<LogicalPlan>> join_children;
       for (auto& child : children) {
-      auto* relation = dynamic_cast<RelationPlan*>(children[0].get());
-      auto* left_outer_join = dynamic_cast<LeftOuterJoinPlan*>(children[0].get());
+        auto* relation = dynamic_cast<RelationPlan*>(child.get());
+        assert(relation != nullptr && "Expected a relation");
 
-      std::string alias;
-      if (relation != nullptr) {
-        alias = relation->alias;
-      } else if (left_outer_join != nullptr) {
-        alias = left_outer_join->alias;
-      } else {
-        throw QueryException("Cartesian product expects aliased children");
-      }
-
-        if (joined_aliases.find(alias) != joined_aliases.end()) {
+        if (joined_aliases.find(relation->alias) != joined_aliases.end()) {
           join_children.push_back(std::move(child));
         }
       }
 
       if (join_children.size() > 1) {
-        groups.push_back(
-            std::make_unique<JoinPlan>(std::move(join_children), std::move(current_join_columns))
-        );
+        // TODO: change to test selinger optimizer
+        auto join_order = JoinOptimizer::greedy(std::move(join_children), current_join_columns);
+        // auto join_order = JoinOptimizer::selinger(std::move(join_children), current_join_columns);
+        groups.push_back(std::make_unique<JoinPlan>(std::move(join_order), std::move(current_join_columns)));
       } else {
         groups.push_back(std::move(join_children[0]));
       }

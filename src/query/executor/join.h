@@ -24,11 +24,11 @@ public:
     assert(equalities.size() > 0);
 
     for (size_t i = 0; i < projected_lhs_columns.size(); i++) {
-      out.values[i] = lhs_out.values[projected_lhs_columns[i].first];
+      out.values[i] = lhs_out.values[projected_lhs_columns[i].pos];
     }
     size_t offset = projected_lhs_columns.size();
     for (size_t i = 0; i < projected_rhs_columns.size(); i++) {
-      out.values[offset + i] = rhs_out.values[projected_rhs_columns[i].first];
+      out.values[offset + i] = rhs_out.values[projected_rhs_columns[i].pos];
     }
   }
 
@@ -70,7 +70,6 @@ public:
   void reset() override {
     lhs->reset();
     rhs->reset();
-    valid_lhs = false;
   }
 
   RecordRef& get_output() override {
@@ -80,10 +79,10 @@ public:
   std::vector<Column> get_columns() override {
     std::vector<Column> res;
     for (auto& c : projected_lhs_columns) {
-      res.push_back(c.second);
+      res.push_back(c.col);
     }
     for (auto& c : projected_rhs_columns) {
-      res.push_back(c.second);
+      res.push_back(c.col);
     }
     return res;
   }
@@ -91,19 +90,19 @@ public:
   std::ostream& print_to_ostream(std::ostream& os, int indent = 0) const override {
     os << std::string(indent, ' ');
     os << "Join(";
-    os << projected_lhs_columns[equalities[0].first].second.alias << "."
-       << projected_lhs_columns[equalities[0].first].second.info.name;
+    os << projected_lhs_columns[equalities[0].first].col.alias << "."
+       << projected_lhs_columns[equalities[0].first].col.info.name;
     os << " == ";
-    os << projected_rhs_columns[equalities[0].second].second.alias << "."
-       << projected_rhs_columns[equalities[0].second].second.info.name;
+    os << projected_rhs_columns[equalities[0].second].col.alias << "."
+       << projected_rhs_columns[equalities[0].second].col.info.name;
 
     for (size_t i = 1; i < equalities.size(); ++i) {
       os << " AND ";
-      os << projected_lhs_columns[equalities[1].first].second.alias << "."
-         << projected_lhs_columns[equalities[1].first].second.info.name;
+      os << projected_lhs_columns[equalities[i].first].col.alias << "."
+         << projected_lhs_columns[equalities[i].first].col.info.name;
       os << " == ";
-      os << projected_rhs_columns[equalities[1].second].second.alias << "."
-         << projected_rhs_columns[equalities[1].second].second.info.name;
+      os << projected_rhs_columns[equalities[i].second].col.alias << "."
+         << projected_rhs_columns[equalities[i].second].col.info.name;
     }
     os << ")\n";
     lhs->print_to_ostream(os, indent + 2);
