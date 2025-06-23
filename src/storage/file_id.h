@@ -6,11 +6,17 @@ class FileId {
 public:
   static constexpr int UNASSIGNED = INT32_MAX;
 
-  int id;
+  int fd;
+  int internal_id;
 
-  FileId(int id) : id(id) {}
+  FileId(int fd, int internal_id)
+      : fd(fd), internal_id(internal_id) {}
 
-  bool operator<(const FileId other) const { return this->id < other.id; }
+  bool operator<(const FileId other) const {
+    return this->fd < other.fd;
+  }
 
-  bool operator==(const FileId other) const { return this->id == other.id; }
+  bool operator==(const FileId other) const {
+    return this->fd == other.fd;
+  }
 };

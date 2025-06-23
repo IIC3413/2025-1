@@ -24,6 +24,8 @@ public:
   // return true and writes the record in out otherwise
   bool get_record(int32_t dir_pos, Record& out) const;
 
+  void edit_record(int32_t dir_pos, const Record& record);
+
   void delete_record(int32_t dir_pos);
 
   int32_t get_dir_count() const;

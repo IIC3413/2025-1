@@ -4,7 +4,6 @@
 #include "storage/b_plus_tree/b_plus_tree_iter.h"
 #include "storage/heap_file/heap_file.h"
 #include "storage/heap_file/heap_file_iter.h"
-#include "system/system.h"
 
 // construct 8 byte integer with first 8 characters
 int64_t serialize_string_key(const char* str) {
@@ -19,11 +18,11 @@ int64_t serialize_string_key(const char* str) {
   return res;
 }
 
-BPlusTree::BPlusTree(const HeapFile& heap_file, int key_column_idx, const std::string& idx_name)
+BPlusTree::BPlusTree(const HeapFile& heap_file, int key_column_idx, FileId dir_file_id, FileId leaf_file_id)
     : heap_file(heap_file),
       key_column_idx(key_column_idx),
-      dir_file_id(file_mgr.get_file_id(idx_name + ".dir")),
-      leaf_file_id(file_mgr.get_file_id(idx_name + ".leaf")),
+      dir_file_id(dir_file_id),
+      leaf_file_id(leaf_file_id),
       record_buf(heap_file.schema) {
   root = std::make_unique<BPlusTreeDir>(*this, 0);
   if (root->get_child_count() == 0) {

@@ -20,7 +20,7 @@ FileManager::FileManager(const std::string& db_folder) : db_folder(db_folder) {
 }
 
 void FileManager::flush(Page& page) const {
-  auto fd = page.page_id.file_id.id;
+  auto fd = page.page_id.file_id.fd;
   lseek(fd, page.page_id.page_number * Page::SIZE, SEEK_SET);
   auto write_res = write(fd, page.bytes, Page::SIZE);
   if (write_res == -1) {
@@ -30,7 +30,7 @@ void FileManager::flush(Page& page) const {
 }
 
 void FileManager::read_page(PageId page_id, char* bytes) const {
-  auto fd = page_id.file_id.id;
+  auto fd = page_id.file_id.fd;
   lseek(fd, 0, SEEK_END);
 
   struct stat buf;
@@ -55,19 +55,44 @@ void FileManager::read_page(PageId page_id, char* bytes) const {
   }
 }
 
-FileId FileManager::get_file_id(const string& filename) {
-  auto search = filename2file_id.find(filename);
-  if (search != filename2file_id.end()) {
-    return search->second;
-  } else {
-    const auto file_path = get_file_path(filename);
+FileId FileManager::get_file_id(const std::string& filename, int internal_id) {
+  const auto file_path = get_file_path(filename);
 
-    auto fd = open(file_path.c_str(), O_RDWR | O_CREAT, S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP | S_IROTH);
-    if (fd == -1) {
-      throw std::runtime_error("Could not open file " + file_path);
-    }
-    const auto res = FileId(fd);
-    filename2file_id.insert({filename, res});
-    return res;
+  assert(internal_file_ids.find(internal_id) == internal_file_ids.end());
+
+  auto fd = open(file_path.c_str(), O_RDWR | O_CREAT, S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP | S_IROTH);
+  if (fd == -1) {
+    throw std::runtime_error("Could not open file " + file_path);
   }
+  internal_file_ids.insert({internal_id, fd});
+  return FileId(fd, internal_id);
+}
+
+FileId FileManager::get_file_id(int internal_id) {
+  assert(internal_file_ids.find(internal_id) != internal_file_ids.end());
+
+  for (auto&& [iid, fd] : internal_file_ids) {
+    if (iid == internal_id) {
+      return FileId(fd, internal_id);
+    }
+  }
+  throw std::runtime_error("searching for a file_id that doesn't exist");
+}
+
+FileId FileManager::create_file_id(const std::string& filename) {
+  const auto file_path = get_file_path(filename);
+
+  int internal_id = internal_file_ids.size();
+
+  // make sure internal_id is new
+  while (internal_file_ids.find(internal_id) != internal_file_ids.end()) {
+    internal_id++;
+  }
+
+  auto fd = open(file_path.c_str(), O_RDWR | O_CREAT, S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP | S_IROTH);
+  if (fd == -1) {
+    throw std::runtime_error("Could not open file " + file_path);
+  }
+  internal_file_ids.insert({internal_id, fd});
+  return FileId(fd, internal_id);
 }

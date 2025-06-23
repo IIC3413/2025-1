@@ -1,7 +1,6 @@
 #pragma once
 
 #include <memory>
-#include <string>
 
 #include "relational_model/record.h"
 #include "relational_model/table_info.h"
@@ -17,12 +16,14 @@ public:
 
   const TableId table_id;
 
-  HeapFile(TableId table_id, const Schema& schema, const std::string& table_name);
+  HeapFile(TableId table_id, const Schema& schema, FileId file_id);
 
   // prevent accidental copies
   HeapFile(const HeapFile& other) = delete;
 
   RID insert_record(const Record& record);
+
+  void edit_record(RID rid, const Record& record);
 
   void delete_record(RID rid);
 

@@ -56,6 +56,7 @@ Catalog::Catalog(const string& filename) {
     std::vector<ColumnInfo> columns;
 
     std::string table_name = read_string();
+    auto internal_table_file_id = read_int64();
     int64_t table_cardinality = read_int64();
     int64_t table_column_count = read_int64();
     for (int64_t c = 0; c < table_column_count; ++c) {
@@ -67,7 +68,8 @@ Catalog::Catalog(const string& filename) {
     auto schema = std::make_unique<Schema>(std::move(columns));
 
     auto& schema_ref = *schema.get();
-    auto heap_file = std::make_unique<HeapFile>(i, schema_ref, table_name);
+    auto table_file_id = file_mgr.get_file_id(table_name, internal_table_file_id);
+    auto heap_file = std::make_unique<HeapFile>(i, schema_ref, table_file_id);
     table_name_idx.insert({table_name, tables.size()});
 
     std::unique_ptr<Index> index;
@@ -75,7 +77,13 @@ Catalog::Catalog(const string& filename) {
     switch (index_type) {
     case IndexType::B_PLUS_TREE: {
       auto key_col_idx = read_int64();
-      index = std::make_unique<BPlusTree>(*heap_file.get(), key_col_idx, normalize(table_name) + ".bpt");
+      auto internal_dir_file_id = read_int64();
+      auto internal_leaf_file_id = read_int64();
+
+      auto dir_file_id = file_mgr.get_file_id(table_name + ".bpt.dir", internal_dir_file_id);
+      auto leaf_file_id = file_mgr.get_file_id(table_name + ".bpt.leaf", internal_leaf_file_id);
+
+      index = std::make_unique<BPlusTree>(*heap_file.get(), key_col_idx, dir_file_id, leaf_file_id);
       break;
     }
     case IndexType::NONE:
@@ -94,6 +102,7 @@ Catalog::~Catalog() {
   write_int64(tables.size());
   for (auto& table_info : tables) {
     write_string(table_info.name);
+    write_int64(table_info.heap_file->file_id.internal_id);
     auto& schema = table_info.schema;
 
     write_int64(table_info.cardinality);
@@ -113,6 +122,8 @@ Catalog::~Catalog() {
       case IndexType::B_PLUS_TREE: {
         auto casted = reinterpret_cast<BPlusTree*>(table_info.index.get());
         write_int64(casted->key_column_idx);
+        write_int64(casted->dir_file_id.internal_id);
+        write_int64(casted->leaf_file_id.internal_id);
         break;
       }
       case IndexType::NONE:
@@ -174,7 +185,8 @@ HeapFile* Catalog::create_table(const std::string& table_name, const Schema& sch
   TableId table_id = tables.size();
   table_name_idx.insert({normalized_table_name, table_id});
 
-  auto heap_file = std::make_unique<HeapFile>(table_id, schema, normalized_table_name);
+  auto file_id = file_mgr.create_file_id(normalized_table_name);
+  auto heap_file = std::make_unique<HeapFile>(table_id, schema, file_id);
 
   tables.emplace_back(
       normalized_table_name, std::make_unique<Schema>(schema), std::move(heap_file), nullptr, 0
@@ -213,6 +225,18 @@ RID Catalog::insert_record(
   }
 
   return rid;
+}
+
+void Catalog::edit_record(
+    const std::string& table_name, RID rid, const std::vector<std::variant<std::string_view, int64_t>>& values
+) {
+  auto table_pos = get_table_pos(table_name);
+
+  auto& record = *tables[table_pos].record_buf;
+  record.set(values);
+
+  tables[table_pos].heap_file->edit_record(rid, record);
+  // TODO: index is not updated yet
 }
 
 void Catalog::delete_record(const std::string& table_name, RID rid) {
@@ -254,13 +278,7 @@ DataType Catalog::get_datatype(const std::string& table_name, const std::string&
 }
 
 const TableInfo& Catalog::get_table_info(const std::string& table_name) const {
-  std::string normalized_table_name = normalize(table_name);
   return tables[get_table_pos(table_name)];
-}
-
-FileId Catalog::get_file_id(TableId tid) {
-  assert(tables.size() > tid);
-  return tables[tid].heap_file->file_id;
 }
 
 void Catalog::create_index(const std::string& table_name, int key_col_idx) {
@@ -271,8 +289,12 @@ void Catalog::create_index(const std::string& table_name, int key_col_idx) {
     throw QueryException("table: `" + table_name + "` already has an index.");
   }
 
+  std::string normalized_table_name = normalize(table_name);
+  auto dir_file_id = file_mgr.create_file_id(normalized_table_name + ".bpt.dir");
+  auto leaf_file_id = file_mgr.create_file_id(normalized_table_name + ".bpt.leaf");
+
   table_info.index =
-      std::make_unique<BPlusTree>(*table_info.heap_file, key_col_idx, normalize(table_name) + ".bpt");
+      std::make_unique<BPlusTree>(*table_info.heap_file, key_col_idx, dir_file_id, leaf_file_id);
 
   auto iter = table_info.heap_file->get_record_iter();
   Record record_buf(*table_info.schema);

@@ -7,7 +7,6 @@
 
 #include "exceptions/exceptions.h"
 #include "query/parser/logical_plan/expr/expr_plans.h"
-#include "query/parser/logical_plan/join_order/join_optimizer.h"
 #include "query/parser/logical_plan/left_outer_join_plan.h"
 #include "query/parser/logical_plan/plans.h"
 
@@ -84,10 +83,8 @@ public:
       }
 
       if (join_children.size() > 1) {
-        // TODO: change to test selinger optimizer
-        auto join_order = JoinOptimizer::greedy(std::move(join_children), current_join_columns);
-        // auto join_order = JoinOptimizer::selinger(std::move(join_children), current_join_columns);
-        groups.push_back(std::make_unique<JoinPlan>(std::move(join_order), std::move(current_join_columns)));
+        groups.push_back(std::make_unique<JoinPlan>(std::move(join_children), std::move(current_join_columns))
+        );
       } else {
         groups.push_back(std::move(join_children[0]));
       }

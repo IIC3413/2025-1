@@ -7,9 +7,8 @@
 
 #include "relational_model/record.h"
 #include "relational_model/schema.h"
-#include "storage/file_id.h"
-#include "storage/heap_file/rid.h"
 #include "storage/heap_file/heap_file.h"
+#include "storage/heap_file/rid.h"
 
 class Catalog {
 public:
@@ -21,6 +20,10 @@ public:
   // sets the schema when the table is found
   HeapFile* get_table(const std::string& table_name, Schema* schema);
 
+  const std::vector<TableInfo>& get_tables() const {
+    return tables;
+  }
+
   HeapFile* create_table(const std::string& table_name, const Schema&);
 
   bool table_exists(const std::string& table_name) const;
@@ -31,13 +34,17 @@ public:
       const std::string& table_name, const std::vector<std::variant<std::string_view, int64_t>>& values
   );
 
+  void edit_record(
+      const std::string& table_name,
+      RID rid,
+      const std::vector<std::variant<std::string_view, int64_t>>& values
+  );
+
   void delete_record(const std::string& table_name, RID rid);
 
   Record& get_record_buf(const std::string& table_name);
 
   const TableInfo& get_table_info(const std::string& table_name) const;
-
-  FileId get_file_id(TableId tid);
 
   void create_index(const std::string& table_name, int key_col_idx);
 
@@ -47,6 +54,8 @@ public:
 
 private:
   std::map<std::string, int64_t> table_name_idx;
+
+  std::map<std::string, int> filename2internal_file_id;
 
   std::vector<TableInfo> tables;
 

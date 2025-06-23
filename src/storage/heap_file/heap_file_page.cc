@@ -143,6 +143,23 @@ bool HeapFilePage::try_insert_record(const Record& record, RID* out_record_id) {
   return true;
 }
 
+void HeapFilePage::edit_record(int32_t dir_pos, const Record& record) {
+  int32_t offset = get_dir(dir_pos);
+  for (auto& v : record.values) {
+    switch (v.datatype) {
+    case DataType::INT: {
+      page.write_int64(offset, v.value.as_int);
+      offset += sizeof(int64_t);
+      break;
+    }
+    case DataType::STR: {
+      throw std::runtime_error("Edit of strings nor supported");
+      break;
+    }
+    }
+  }
+}
+
 void HeapFilePage::vacuum(const Schema& schema) {
   char* page_buf = new char[Page::SIZE];
 

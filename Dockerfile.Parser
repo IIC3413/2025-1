@@ -1,9 +1,0 @@
-FROM openjdk:23-slim-bullseye AS build-stage
-
-COPY . .
-
-WORKDIR /src/query/parser/grammar
-
-RUN chmod +x ./generate.sh
-
-ENTRYPOINT ["./generate.sh"]

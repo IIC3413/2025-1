@@ -58,9 +58,7 @@ void BufferManager::flush() {
 }
 
 void BufferManager::fake_flush() {
-  // flush() is always called at destruction.
-  // this is important to check to avoid segfault when program terminates before calling init()
-  assert(frames != nullptr);
+  // prevents a correct flush to test log manager recovery
   for (int64_t i = 0; i < frame_count; i++) {
     frames[i].dirty = false;
   }
@@ -89,7 +87,7 @@ Page& BufferManager::get_page(FileId file_id, int64_t page_number) {
 
   if (it == page_map.end()) {
     auto& page = get_unused_page();
-    if (page.page_id.file_id.id != FileId::UNASSIGNED) {
+    if (page.page_id.file_id.internal_id != FileId::UNASSIGNED) {
       page_map.erase(page.page_id);
     }
 

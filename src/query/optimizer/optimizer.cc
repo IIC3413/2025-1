@@ -203,7 +203,7 @@ void Optimizer::visit(JoinPlan& join) {
           std::move(lhs), std::move(rhs), std::move(projected_lhs_columns), std::move(projected_rhs_columns)
       );
     } else {
-      current_iter = std::make_unique<HashJoin>(
+      current_iter = std::make_unique<Join>(
           std::move(lhs), std::move(rhs), std::move(projected_lhs_columns), std::move(projected_rhs_columns),
           std::move(equalities)
       );

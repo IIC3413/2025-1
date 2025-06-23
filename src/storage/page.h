@@ -55,7 +55,7 @@ private:
   bool dirty;
 
   Page() noexcept
-      : page_id(FileId(FileId::UNASSIGNED), 0),
+      : page_id(FileId(-1, FileId::UNASSIGNED), 0),
         bytes(nullptr),
         pins(0),
         second_chance(false),

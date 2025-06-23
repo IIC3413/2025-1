@@ -2,36 +2,23 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "Test L4",
+            "name": "SimpleRecovery",
             "type": "lldb",
             "request": "launch",
-            "program": "${workspaceFolder}/build/Debug/bin/execute_query",
+            "program": "${workspaceFolder}/build/Debug/bin/simple_recovery",
             "args": [
-                "${workspaceFolder}/data/test_example",
-                "${workspaceFolder}/data/query1.sql",
-                "--explain",
+                "${workspaceFolder}/data/tests/t1",
             ],
             "cwd": "${workspaceFolder}",
             "preLaunchTask": "Debug Build"
         },
         {
-            "name": "CreateDB",
+            "name": "ChkpRecovery",
             "type": "lldb",
             "request": "launch",
-            "program": "${workspaceFolder}/build/Debug/bin/create_db",
+            "program": "${workspaceFolder}/build/Debug/bin/chkp_recovery",
             "args": [
-            ],
-            "cwd": "${workspaceFolder}",
-            "preLaunchTask": "Debug Build"
-        },
-        {
-            "name": "print table",
-            "type": "lldb",
-            "request": "launch",
-            "program": "${workspaceFolder}/build/Debug/bin/print_table",
-            "args": [
-                "data/test_example",
-                "test_1"
+                "${workspaceFolder}/data/tests/t4",
             ],
             "cwd": "${workspaceFolder}",
             "preLaunchTask": "Debug Build"

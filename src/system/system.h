@@ -3,6 +3,7 @@
 #include "system/buffer_manager.h"
 #include "system/catalog.h"
 #include "system/file_manager.h"
+#include "system/log_manager.h"
 
 class System {
 public:
@@ -19,4 +20,5 @@ private:
 // global objects
 extern FileManager& file_mgr;
 extern BufferManager& buffer_mgr;
+extern LogManager& log_mgr;
 extern Catalog& catalog;

@@ -8,7 +8,7 @@
 
 class BPlusTree : public Index {
 public:
-  BPlusTree(const HeapFile& heap_file, int key_col_idx, const std::string& idx_name);
+  BPlusTree(const HeapFile& heap_file, int key_col_idx, FileId dir_file_id, FileId leaf_file_id);
 
   void insert_record(RID rid) override;
 

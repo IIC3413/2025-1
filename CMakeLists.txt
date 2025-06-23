@@ -51,11 +51,15 @@ add_library(iic3413db STATIC ${SRCS})
 target_compile_definitions(iic3413db PUBLIC SERD_STATIC)
 
 set(BUILD_TARGETS
-    create_db
     create_table
-    insert
-    print_table
-	execute_query
+    print_tables
+    print_log
+    simple_recovery
+    chkp_recovery
+    create_test1
+    create_test2
+    create_test3
+    create_test4
 )
 
 # Build targets

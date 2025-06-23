@@ -30,7 +30,7 @@ struct PageId {
 };
 
 template <> struct std::hash<PageId> {
-  std::size_t operator()(PageId const& k) const noexcept { return k.file_id.id | (k.page_number << 6); }
+  std::size_t operator()(PageId const& k) const noexcept { return k.file_id.internal_id | (k.page_number << 6); }
 };
 
 static_assert(std::is_trivially_copyable<PageId>::value);

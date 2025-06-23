@@ -34,7 +34,7 @@ public:
   }
 
   bool next() override {
-    // TODO: not available, students still may have ticket for late lab3
+    // TODO: deleted, students still may have ticket
     return false;
   }
 
@@ -98,8 +98,6 @@ private:
   std::unique_ptr<Record> rhs_buffer;
 
   bool valid_lhs;
-
-  bool outer_match;
 
   std::vector<Value> rhs_null_values;
 
